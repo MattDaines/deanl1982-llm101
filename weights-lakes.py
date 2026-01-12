@@ -45,13 +45,32 @@ tube_lats = [lat for (lat, lon) in tube_stations.values()]
 plt.scatter(tube_lons, tube_lats, label="London Tube stations", alpha=0.9)
 
 # Labels
-def label_points(points_dict, every_n=1, fontsize=8):
+def label_points(points_dict, every_n=1, fontsize=8, offset_x=0, offset_y=0):
     for i, (name, (lat, lon)) in enumerate(points_dict.items()):
         if i % every_n == 0:
-            plt.text(lon, lat, name, fontsize=fontsize)
+            plt.text(lon + offset_x, lat + offset_y, name, fontsize=fontsize)
 
+# Custom offsets for tube stations to spread labels apart
+tube_label_offsets = {
+    "Oxford Circus": (0.002, 0.002),
+    "Green Park": (-0.003, -0.001),
+    "Baker Street": (-0.005, 0.003),
+    "King's Cross St Pancras": (0.004, 0.002),
+    "Waterloo": (0.001, -0.003),
+    "Victoria": (-0.004, -0.003),
+    "London Bridge": (0.005, 0.0),
+    "Canary Wharf": (0.003, -0.002),
+    "Bank": (0.0, 0.003),
+    "Paddington": (-0.006, 0.001),
+}
+
+# Label lakes normally
 label_points(lakes, every_n=1, fontsize=8)
-label_points(tube_stations, every_n=1, fontsize=8)
+
+# Label tube stations with custom offsets to avoid overlap
+for name, (lat, lon) in tube_stations.items():
+    offset_x, offset_y = tube_label_offsets.get(name, (0, 0))
+    plt.text(lon + offset_x, lat + offset_y, name, fontsize=8)
 
 # Axes, title, etc.
 plt.xlabel("Longitude (X)")

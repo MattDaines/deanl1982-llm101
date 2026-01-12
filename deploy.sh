@@ -140,25 +140,35 @@ echo "✓ Website files prepared"
 echo ""
 echo "Deploying website to Azure Storage Account..."
 
+# Get storage account key
+echo "  Getting storage account key..."
+STORAGE_KEY=$(az storage account keys list \
+    --resource-group "$RESOURCE_GROUP_NAME" \
+    --account-name "$STORAGE_ACCOUNT_NAME" \
+    --query '[0].value' \
+    --output tsv)
+
 # Upload HTML files
+echo "  Uploading HTML files..."
 az storage blob upload-batch \
     --account-name "$STORAGE_ACCOUNT_NAME" \
+    --account-key "$STORAGE_KEY" \
     --source "$DEPLOY_DIR" \
     --destination '$web' \
     --pattern "*.html" \
     --content-type 'text/html' \
-    --overwrite \
-    --auth-mode login
+    --overwrite
 
 # Upload PNG files
+echo "  Uploading image files..."
 az storage blob upload-batch \
     --account-name "$STORAGE_ACCOUNT_NAME" \
+    --account-key "$STORAGE_KEY" \
     --source "$DEPLOY_DIR" \
     --destination '$web' \
     --pattern "*.png" \
     --content-type 'image/png' \
-    --overwrite \
-    --auth-mode login
+    --overwrite
 
 echo "✓ Files uploaded to storage account"
 

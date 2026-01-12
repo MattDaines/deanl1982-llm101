@@ -123,25 +123,35 @@ Write-Host "✓ Website files prepared" -ForegroundColor Green
 Write-Host ""
 Write-Host "Deploying website to Azure Storage Account..." -ForegroundColor Yellow
 
+# Get storage account key
+Write-Host "  Getting storage account key..." -ForegroundColor Gray
+$storageKey = (az storage account keys list `
+    --resource-group $resourceGroupName `
+    --account-name $storageAccountName `
+    --query '[0].value' `
+    --output tsv)
+
 # Upload HTML files
+Write-Host "  Uploading HTML files..." -ForegroundColor Gray
 az storage blob upload-batch `
     --account-name $storageAccountName `
+    --account-key $storageKey `
     --source $deployDir `
     --destination '$web' `
     --pattern "*.html" `
     --content-type 'text/html' `
-    --overwrite `
-    --auth-mode login
+    --overwrite
 
 # Upload PNG files
+Write-Host "  Uploading image files..." -ForegroundColor Gray
 az storage blob upload-batch `
     --account-name $storageAccountName `
+    --account-key $storageKey `
     --source $deployDir `
     --destination '$web' `
     --pattern "*.png" `
     --content-type 'image/png' `
-    --overwrite `
-    --auth-mode login
+    --overwrite
 
 Write-Host "✓ Files uploaded to storage account" -ForegroundColor Green
 

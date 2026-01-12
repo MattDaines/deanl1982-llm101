@@ -24,13 +24,18 @@ resource "azurerm_resource_group" "bingo" {
   }
 }
 
-# Static Web App
-resource "azurerm_static_web_app" "bingo" {
-  name                = var.app_name
-  resource_group_name = azurerm_resource_group.bingo.name
-  location            = var.location
-  sku_tier            = "Free"
-  sku_size            = "Free"
+# Storage Account for Static Website
+resource "azurerm_storage_account" "bingo" {
+  name                     = var.storage_account_name
+  resource_group_name      = azurerm_resource_group.bingo.name
+  location                 = azurerm_resource_group.bingo.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  account_kind             = "StorageV2"
+
+  static_website {
+    index_document = "index.html"
+  }
 
   tags = {
     Environment = var.environment

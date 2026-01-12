@@ -5,15 +5,15 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "Azure region for resources (must support Static Web Apps: westus2, centralus, eastus2, westeurope, eastasia)"
+  description = "Azure region for resources"
   type        = string
-  default     = "eastus2"
+  default     = "eastus"
 }
 
-variable "app_name" {
-  description = "Name of the Static Web App"
+variable "storage_account_name" {
+  description = "Name of the storage account (must be globally unique, 3-24 lowercase letters and numbers)"
   type        = string
-  default     = "ai-bingo-game"
+  default     = "aibingostorage"
 }
 
 variable "environment" {

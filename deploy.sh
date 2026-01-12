@@ -99,9 +99,8 @@ if [ "$SKIP_TERRAFORM" = false ]; then
     echo "✓ Infrastructure deployed"
 
     # Get outputs
-    STATIC_WEB_APP_NAME=$(terraform output -raw static_web_app_name)
-    DEPLOYMENT_TOKEN=$(terraform output -raw deployment_token)
-    WEB_APP_URL=$(terraform output -raw static_web_app_url)
+    STORAGE_ACCOUNT_NAME=$(terraform output -raw storage_account_name)
+    WEBSITE_URL=$(terraform output -raw website_url)
     RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name)
 
     cd ..
@@ -111,13 +110,12 @@ else
 
     # Try to get existing values from Terraform state
     cd terraform
-    STATIC_WEB_APP_NAME=$(terraform output -raw static_web_app_name 2>/dev/null || echo "")
-    DEPLOYMENT_TOKEN=$(terraform output -raw deployment_token 2>/dev/null || echo "")
-    WEB_APP_URL=$(terraform output -raw static_web_app_url 2>/dev/null || echo "")
+    STORAGE_ACCOUNT_NAME=$(terraform output -raw storage_account_name 2>/dev/null || echo "")
+    WEBSITE_URL=$(terraform output -raw website_url 2>/dev/null || echo "")
     RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name 2>/dev/null || echo "")
     cd ..
 
-    if [ -z "$STATIC_WEB_APP_NAME" ]; then
+    if [ -z "$STORAGE_ACCOUNT_NAME" ]; then
         echo "✗ Could not find existing infrastructure. Run without --skip-terraform first."
         exit 1
     fi
@@ -134,49 +132,35 @@ mkdir -p "$DEPLOY_DIR"
 
 # Copy bingo.html as index.html
 cp bingo.html "$DEPLOY_DIR/index.html"
+# Copy logo image
+cp whey-ai-man-banner-middle.png "$DEPLOY_DIR/"
 echo "✓ Website files prepared"
 
-# Check if SWA CLI is installed
+# Deploy website to Azure Storage
 echo ""
-echo "Checking for Azure Static Web Apps CLI..."
-if command -v swa &> /dev/null; then
-    SWA_VERSION=$(swa --version)
-    echo "✓ SWA CLI installed (version $SWA_VERSION)"
-else
-    echo "✗ SWA CLI not found. Installing..."
+echo "Deploying website to Azure Storage Account..."
 
-    # Check if npm is installed
-    if command -v npm &> /dev/null; then
-        echo "  Installing @azure/static-web-apps-cli..."
+# Upload HTML files
+az storage blob upload-batch \
+    --account-name "$STORAGE_ACCOUNT_NAME" \
+    --source "$DEPLOY_DIR" \
+    --destination '$web' \
+    --pattern "*.html" \
+    --content-type 'text/html' \
+    --overwrite \
+    --auth-mode login
 
-        # Try to install globally, if that fails due to permissions, try with sudo
-        if npm install -g @azure/static-web-apps-cli 2>/dev/null; then
-            echo "✓ SWA CLI installed globally"
-        elif sudo npm install -g @azure/static-web-apps-cli 2>/dev/null; then
-            echo "✓ SWA CLI installed globally (with sudo)"
-        else
-            # If both fail, install locally to the project
-            echo "  Global install failed, installing locally..."
-            npm install @azure/static-web-apps-cli
-            # Add local node_modules to PATH for this session
-            export PATH="$PWD/node_modules/.bin:$PATH"
-            echo "✓ SWA CLI installed locally"
-        fi
-    else
-        echo "✗ npm not found. Please install Node.js from: https://nodejs.org/"
-        exit 1
-    fi
-fi
+# Upload PNG files
+az storage blob upload-batch \
+    --account-name "$STORAGE_ACCOUNT_NAME" \
+    --source "$DEPLOY_DIR" \
+    --destination '$web' \
+    --pattern "*.png" \
+    --content-type 'image/png' \
+    --overwrite \
+    --auth-mode login
 
-# Deploy website using SWA CLI
-echo ""
-echo "Deploying website to Azure Static Web App..."
-cd "$DEPLOY_DIR"
-
-export SWA_CLI_DEPLOYMENT_TOKEN="$DEPLOYMENT_TOKEN"
-swa deploy . --deployment-token "$DEPLOYMENT_TOKEN" --env production
-
-cd ..
+echo "✓ Files uploaded to storage account"
 
 echo ""
 echo "====================================="
@@ -184,11 +168,11 @@ echo "Deployment Complete!"
 echo "====================================="
 echo ""
 echo "Your AI Bingo Game is now live at:"
-echo "  $WEB_APP_URL"
+echo "  $WEBSITE_URL"
 echo ""
 echo "Share this URL with your meeting participants!"
 echo ""
 echo "Resource Details:"
 echo "  Resource Group: $RESOURCE_GROUP_NAME"
-echo "  Static Web App: $STATIC_WEB_APP_NAME"
+echo "  Storage Account: $STORAGE_ACCOUNT_NAME"
 echo ""

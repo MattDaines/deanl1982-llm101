@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Terms Bingo</title>
+    <title>Whey-AI-Man AI Buzzword Bingo</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #F5E6D3 0%, #E8D4B8 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -26,15 +26,31 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
         }
 
+        .logo {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+        }
+
         h1 {
-            color: #667eea;
+            color: #FF6B35;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #2A9D8F;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 2.5em;
+            font-size: 1.2em;
+            font-weight: 600;
         }
 
         .name-entry {
@@ -53,11 +69,11 @@
 
         .name-entry input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #FF6B35;
         }
 
         .name-entry button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
             color: white;
             border: none;
             padding: 15px 40px;
@@ -69,7 +85,7 @@
 
         .name-entry button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
         }
 
         .game-screen {
@@ -84,7 +100,7 @@
         }
 
         .player-info strong {
-            color: #667eea;
+            color: #FF6B35;
         }
 
         .bingo-grid {
@@ -95,8 +111,8 @@
         }
 
         .bingo-cell {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border: 3px solid #ddd;
+            background: linear-gradient(135deg, #F5E6D3 0%, #E8D4B8 100%);
+            border: 3px solid #2A9D8F;
             border-radius: 15px;
             padding: 20px;
             text-align: center;
@@ -113,13 +129,13 @@
 
         .bingo-cell:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(42, 157, 143, 0.3);
         }
 
         .bingo-cell.marked {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
             color: white;
-            border-color: #667eea;
+            border-color: #FF6B35;
             transform: scale(0.95);
         }
 
@@ -141,7 +157,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #FF6B35 0%, #2A9D8F 100%);
             transition: width 0.3s;
             width: 0%;
         }
@@ -179,7 +195,7 @@
         }
 
         .winner-content h2 {
-            color: #667eea;
+            color: #FF6B35;
             font-size: 3em;
             margin-bottom: 20px;
         }
@@ -194,7 +210,7 @@
             position: fixed;
             width: 10px;
             height: 10px;
-            background: #667eea;
+            background: #FF6B35;
             position: absolute;
             animation: confetti-fall 3s linear;
         }
@@ -229,7 +245,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 AI Terms Bingo</h1>
+        <img src="whey-ai-man-banner-middle.png" alt="Whey-AI-Man" class="logo">
+        <h1>Whey-AI-Man</h1>
+        <div class="subtitle">AI Buzzword Bingo</div>
 
         <div class="name-entry" id="nameEntry">
             <input type="text" id="playerName" placeholder="Enter your name" maxlength="50">
@@ -350,7 +368,7 @@
         }
 
         function createConfetti() {
-            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'];
+            const colors = ['#FF6B35', '#FF8C42', '#2A9D8F', '#F5E6D3', '#4A7C59'];
 
             for (let i = 0; i < 100; i++) {
                 setTimeout(() => {

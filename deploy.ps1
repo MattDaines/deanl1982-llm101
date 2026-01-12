@@ -82,9 +82,8 @@ if (-not $SkipTerraform) {
     Write-Host "✓ Infrastructure deployed" -ForegroundColor Green
 
     # Get outputs
-    $staticWebAppName = terraform output -raw static_web_app_name
-    $deploymentToken = terraform output -raw deployment_token
-    $webAppUrl = terraform output -raw static_web_app_url
+    $storageAccountName = terraform output -raw storage_account_name
+    $websiteUrl = terraform output -raw website_url
     $resourceGroupName = terraform output -raw resource_group_name
 
     Pop-Location
@@ -94,13 +93,12 @@ if (-not $SkipTerraform) {
 
     # Try to get existing values from Terraform state
     Push-Location terraform
-    $staticWebAppName = terraform output -raw static_web_app_name 2>$null
-    $deploymentToken = terraform output -raw deployment_token 2>$null
-    $webAppUrl = terraform output -raw static_web_app_url 2>$null
+    $storageAccountName = terraform output -raw storage_account_name 2>$null
+    $websiteUrl = terraform output -raw website_url 2>$null
     $resourceGroupName = terraform output -raw resource_group_name 2>$null
     Pop-Location
 
-    if (-not $staticWebAppName) {
+    if (-not $storageAccountName) {
         Write-Host "✗ Could not find existing infrastructure. Run without -SkipTerraform first." -ForegroundColor Red
         exit 1
     }
@@ -117,58 +115,35 @@ New-Item -ItemType Directory -Path $deployDir | Out-Null
 
 # Copy bingo.html as index.html
 Copy-Item -Path "bingo.html" -Destination "$deployDir/index.html"
+# Copy logo image
+Copy-Item -Path "whey-ai-man-banner-middle.png" -Destination "$deployDir/"
 Write-Host "✓ Website files prepared" -ForegroundColor Green
 
-# Check if SWA CLI is installed
+# Deploy website to Azure Storage
 Write-Host ""
-Write-Host "Checking for Azure Static Web Apps CLI..." -ForegroundColor Yellow
-$swaInstalled = $false
-try {
-    $swaCheck = Get-Command swa -ErrorAction SilentlyContinue
-    if ($swaCheck) {
-        $swaVersion = & swa --version 2>$null
-        Write-Host "✓ SWA CLI installed (version $swaVersion)" -ForegroundColor Green
-        $swaInstalled = $true
-    }
-} catch {
-    # SWA not found
-}
+Write-Host "Deploying website to Azure Storage Account..." -ForegroundColor Yellow
 
-if (-not $swaInstalled) {
-    Write-Host "✗ SWA CLI not found. Installing..." -ForegroundColor Yellow
+# Upload HTML files
+az storage blob upload-batch `
+    --account-name $storageAccountName `
+    --source $deployDir `
+    --destination '$web' `
+    --pattern "*.html" `
+    --content-type 'text/html' `
+    --overwrite `
+    --auth-mode login
 
-    # Check if npm is installed
-    try {
-        $null = Get-Command npm -ErrorAction Stop
-        Write-Host "  Installing @azure/static-web-apps-cli..." -ForegroundColor Gray
+# Upload PNG files
+az storage blob upload-batch `
+    --account-name $storageAccountName `
+    --source $deployDir `
+    --destination '$web' `
+    --pattern "*.png" `
+    --content-type 'image/png' `
+    --overwrite `
+    --auth-mode login
 
-        # Try to install globally first
-        $null = npm install -g @azure/static-web-apps-cli 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ SWA CLI installed globally" -ForegroundColor Green
-        } else {
-            # If global install fails, install locally to the project
-            Write-Host "  Global install failed, installing locally..." -ForegroundColor Gray
-            npm install @azure/static-web-apps-cli
-            # Add local node_modules to PATH for this session
-            $env:PATH = "$PWD\node_modules\.bin;$env:PATH"
-            Write-Host "✓ SWA CLI installed locally" -ForegroundColor Green
-        }
-    } catch {
-        Write-Host "✗ npm not found. Please install Node.js from: https://nodejs.org/" -ForegroundColor Red
-        exit 1
-    }
-}
-
-# Deploy website using SWA CLI
-Write-Host ""
-Write-Host "Deploying website to Azure Static Web App..." -ForegroundColor Yellow
-Push-Location $deployDir
-
-$env:SWA_CLI_DEPLOYMENT_TOKEN = $deploymentToken
-swa deploy . --deployment-token $deploymentToken --env production
-
-Pop-Location
+Write-Host "✓ Files uploaded to storage account" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "=====================================" -ForegroundColor Green
@@ -176,11 +151,11 @@ Write-Host "Deployment Complete!" -ForegroundColor Green
 Write-Host "=====================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Your AI Bingo Game is now live at:" -ForegroundColor Cyan
-Write-Host "  $webAppUrl" -ForegroundColor White -BackgroundColor Blue
+Write-Host "  $websiteUrl" -ForegroundColor White -BackgroundColor Blue
 Write-Host ""
 Write-Host "Share this URL with your meeting participants!" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Resource Details:" -ForegroundColor Gray
 Write-Host "  Resource Group: $resourceGroupName" -ForegroundColor Gray
-Write-Host "  Static Web App: $staticWebAppName" -ForegroundColor Gray
+Write-Host "  Storage Account: $storageAccountName" -ForegroundColor Gray
 Write-Host ""

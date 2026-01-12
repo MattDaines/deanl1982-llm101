@@ -1,20 +1,20 @@
-output "static_web_app_url" {
-  description = "URL of the Static Web App"
-  value       = "https://${azurerm_static_web_app.bingo.default_host_name}"
+output "website_url" {
+  description = "URL of the static website"
+  value       = azurerm_storage_account.bingo.primary_web_endpoint
 }
 
-output "static_web_app_name" {
-  description = "Name of the Static Web App"
-  value       = azurerm_static_web_app.bingo.name
-}
-
-output "deployment_token" {
-  description = "Deployment token for the Static Web App (sensitive)"
-  value       = azurerm_static_web_app.bingo.api_key
-  sensitive   = true
+output "storage_account_name" {
+  description = "Name of the storage account"
+  value       = azurerm_storage_account.bingo.name
 }
 
 output "resource_group_name" {
   description = "Name of the resource group"
   value       = azurerm_resource_group.bingo.name
+}
+
+output "storage_account_key" {
+  description = "Storage account primary access key (sensitive)"
+  value       = azurerm_storage_account.bingo.primary_access_key
+  sensitive   = true
 }

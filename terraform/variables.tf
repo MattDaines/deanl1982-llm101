@@ -5,9 +5,9 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "Azure region for resources"
+  description = "Azure region for resources (must support Static Web Apps: westus2, centralus, eastus2, westeurope, eastasia)"
   type        = string
-  default     = "eastus"
+  default     = "eastus2"
 }
 
 variable "app_name" {
